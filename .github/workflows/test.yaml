@@ -1,0 +1,21 @@
+name: Testing zero to prod
+
+on:
+  pull_request:
+    branches:
+      - master
+
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v3
+
+      - name: use rust
+        uses: actions-rs/cargo@v1
+        with:
+          use-cross: true
+          command: test
