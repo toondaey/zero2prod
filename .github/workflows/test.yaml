@@ -14,8 +14,36 @@ jobs:
       - name: checkout repo
         uses: actions/checkout@v3
 
-      - name: use rust
+      - name: install components
+        uses: actions-rs/toolchain@v1
+        with:
+          components: rustfmt, clippy
+
+
+      - name: install cargo components
         uses: actions-rs/cargo@v1
         with:
-          use-cross: true
+          command: install
+          args: cargo-audit cargo-tarpaulin -v
+
+      - name: run linting
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: -- -D warnings
+
+      - name: run audit
+        uses: actions-rs/cargo@v1
+        with:
+          command: audit
+
+      - name: run code coverage
+        uses: actions-rs/cargo@v1
+        with:
+          command: tarpaulin
+
+      - name: run tests
+        uses: actions-rs/cargo@v1
+        with:
           command: test
+
