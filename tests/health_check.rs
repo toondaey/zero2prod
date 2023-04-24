@@ -1,12 +1,14 @@
+use std::net::TcpListener;
+
 use reqwest::Client;
 
 #[tokio::test]
 async fn test_health_check() {
-    spawn_app();
+    let port = spawn_app();
 
     let client = Client::new();
     let response = client
-        .get("http://localhost:8000/health_check")
+        .get(format!("http://localhost:{port}/health_check"))
         .send()
         .await
         .expect("Could not reach application");
@@ -15,7 +17,10 @@ async fn test_health_check() {
     assert_eq!(Some(0), response.content_length());
 }
 
-fn spawn_app() {
-    let server = zero2prod::run(0).expect("Could not start server");
+fn spawn_app() -> u16 {
+    let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind random port");
+    let port = listener.local_addr().unwrap().port();
+    let server = zero2prod::run(listener).expect("Could not start server");
     let _ = tokio::spawn(server);
+    port
 }
