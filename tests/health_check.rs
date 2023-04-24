@@ -16,6 +16,6 @@ async fn test_health_check() {
 }
 
 fn spawn_app() {
-    let server = zero2prod::run().expect("Could not start server");
+    let server = zero2prod::run(0).expect("Could not start server");
     let _ = tokio::spawn(server);
 }
