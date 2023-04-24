@@ -50,6 +50,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: tarpaulin
+          args: --coveralls ${{ secrets.COVERALLS_TOKEN }}
 
       - name: run tests
         uses: actions-rs/cargo@v1
