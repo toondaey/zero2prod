@@ -4,6 +4,9 @@ on:
   pull_request:
     branches:
       - master
+  push:
+    branches:
+      - master
 
 
 jobs:
@@ -33,6 +36,11 @@ jobs:
           command: clippy
           args: -- -D warnings
 
+      - name: run check
+        uses: actions-rs/cargo@v1
+        with:
+          command: check
+
       - name: run audit
         uses: actions-rs/cargo@v1
         with:
@@ -42,6 +50,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: tarpaulin
+          args: --coveralls ${{ secrets.COVERALLS_TOKEN }}
 
       - name: run tests
         uses: actions-rs/cargo@v1
