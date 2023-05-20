@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+set -x
+set -eo pipefail
+
+if ! [ -x "$(command -v psql)" ]; then
+    echo >&2 "Psql is not installed"
+    exit 1
+fi;
+
+if ! [ -x "$(command -v sqlx)" ]; then
+    echo >&2 "sqlx is not installed"
+    exit 1
+fi;
+
+POSTGRES_USER="${POSTGRES_USER:=postgres}"
+POSTGRES_PASSWORD="${POSTGRES_PASSWORD:=password}"
+POSTGRES_DB="${POSTGRES_DB:=newsletter}"
+POSTGRES_PORT="${POSTGRES_PORT:=5432}"
+
+if [[ -z ${SKIP_DOCKER} ]]; then
+docker run \
+    -e POSTGRES_USER="${POSTGRES_USER:=postgres}" \
+    -e POSTGRES_PASSWORD="${POSTGRES_PASSWORD:=password}" \
+    -e POSTGRES_DB="${POSTGRES_DB:=newsletter}" \
+    -p "${POSTGRES_PORT:=5432}":5432 \
+    --health-cmd pg_isready \
+    --rm \
+    --name z2p-db \
+    -d postgres \
+    postgres -N 1000
+fi
+
+export PGPASSWORD="${POSTGRES_PASSWORD}"
+until psql -h localhost -d "${POSTGRES_DB}" -U "${POSTGRES_USER}" -p "${POSTGRES_PORT}" -c "\q"; do
+    >&2 echo "Postgres is yet unavailable, retrying..."
+    sleep 5
+done
+
+export DATABASE_URL="postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT}/${POSTGRES_DB}"
+
+sqlx database create
+sqlx migrate run
