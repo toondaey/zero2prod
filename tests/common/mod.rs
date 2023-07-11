@@ -1,9 +1,15 @@
+//! tests/health_check.rs
+//!
 use std::net::TcpListener;
 
+use once_cell::sync::Lazy;
 use sqlx::{Executor, PgPool};
 use tokio::task::JoinHandle;
 use uuid::Uuid;
-use zero2prod::config::{app_config::AppConfig, db_config::DatabaseConfig};
+use zero2prod::{
+    config::{app_config::AppConfig, db_config::DatabaseConfig},
+    get_subscriber, init_logger,
+};
 
 pub struct ConfigureTestContext {
     pub port: u16,
@@ -11,6 +17,17 @@ pub struct ConfigureTestContext {
     app_config: AppConfig,
     handle: JoinHandle<Result<(), std::io::Error>>,
 }
+
+// Ensure that the tracing stack is only initialized once using once_cell
+static LOGGER: Lazy<()> = Lazy::new(|| {
+    if std::env::var("TEST_LOG").is_ok() {
+        let subscriber = get_subscriber("zero2prod".to_owned(), "info".to_owned(), std::io::stdout);
+        init_logger(subscriber);
+    } else {
+        let subscriber = get_subscriber("zero2prod".to_owned(), "info".to_owned(), std::io::sink);
+        init_logger(subscriber);
+    };
+});
 
 impl ConfigureTestContext {
     pub async fn setup() -> Self {
@@ -20,6 +37,7 @@ impl ConfigureTestContext {
         let connection_pool = Self::setup_db(&mut config.database).await;
         let server = zero2prod::startup::run(listener, connection_pool.clone())
             .expect("Could not start server");
+        Lazy::force(&LOGGER);
         let handle = tokio::spawn(server);
         ConfigureTestContext {
             port,

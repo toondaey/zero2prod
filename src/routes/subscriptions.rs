@@ -32,7 +32,6 @@ pub async fn subscriptions(
     )
     .execute(connection_pool.get_ref())
     .instrument(query_span)
-    // .instrument(query_span)
     .await
     {
         Ok(_) => {

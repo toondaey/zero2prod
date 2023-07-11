@@ -1,12 +1,13 @@
 use config::{Config, File, Environment};
 use serde::Deserialize;
 
-use super::db_config::DatabaseConfig;
+use super::{db_config::DatabaseConfig, logger_config::LoggerConfig};
 
 #[derive(Deserialize)]
 pub struct AppConfig {
     pub database: DatabaseConfig,
-    pub app_port: u16
+    pub app_port: u16,
+    pub logger: LoggerConfig
 }
 
 impl AppConfig {

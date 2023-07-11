@@ -5,3 +5,7 @@ database:
   username: postgres
   password: password
   name: newsletter
+
+logger:
+  name: zero2prod
+  level: info
