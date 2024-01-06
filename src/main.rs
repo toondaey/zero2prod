@@ -1,5 +1,6 @@
 use std::net::TcpListener;
 
+use secrecy::ExposeSecret;
 // use env_logger::Env;
 use sqlx::PgPool;
 // use tracing::subscriber::set_global_default;
@@ -13,10 +14,10 @@ use zero2prod::{config::app_config::AppConfig, init_logger, get_subscriber};
 #[tokio::main]
 async fn main() -> ::std::io::Result<()> {
     let config = AppConfig::new().expect("Failed to load configuration");
-    let listener = TcpListener::bind(&format!("127.0.0.1:{}", config.app_port))
+    let listener = TcpListener::bind(format!("127.0.0.1:{}", config.app_port))
         .expect("Port is already assigned");
 
-    let connection_pool = PgPool::connect(&config.database.connection_string())
+    let connection_pool = PgPool::connect(config.database.connection_string().expose_secret())
         .await
         .expect("Could not connect to the database");
 

@@ -9,6 +9,7 @@ pub mod config;
 pub mod dtos;
 pub mod routes;
 pub mod startup;
+pub mod database;
 
 pub fn get_subscriber<TSink>(
     name: String,
