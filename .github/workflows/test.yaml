@@ -29,6 +29,18 @@ jobs:
         with:
           command: install
           args: cargo-audit cargo-tarpaulin -v
+            
+      - name: install cargo components
+        uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: sqlx-cli --no-default-features --features native-tls,postgres
+
+      - name: install psql
+        run: sudo apt-get install -y postgresql-client
+
+      - name: start db
+        run: ./scripts/init_db
 
       - name: run linting
         uses: actions-rs/cargo@v1

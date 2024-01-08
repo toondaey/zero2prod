@@ -1,0 +1,11 @@
+app_port: 8000
+database:
+  host: localhost
+  port: 5432
+  username: postgres
+  password: password
+  name: newsletter
+
+logger:
+  name: zero2prod
+  level: info
