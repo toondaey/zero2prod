@@ -1,6 +1,5 @@
 use actix_web::{post, web, HttpResponse};
 use sqlx::PgPool;
-use uuid::Uuid;
 
 use crate::{
     database::subscriptions::insert_subscriber, dtos::subscriptions::SubscriptionsFormData,
@@ -10,7 +9,7 @@ use crate::{
 #[tracing::instrument(
     name = "Adding a new subscriber...",
     skip(form, connection_pool),
-    fields(request_id = %Uuid::new_v4(), email = %form.email, name = %form.name)
+    fields(email = %form.email, name = %form.name)
 )]
 pub async fn subscriptions(
     form: web::Form<SubscriptionsFormData>,
