@@ -8,14 +8,14 @@ use sqlx::{Executor, PgPool};
 use tokio::task::JoinHandle;
 use uuid::Uuid;
 use zero2prod::{
-    config::{app_config::AppConfig, db_config::DatabaseConfig},
+    config::{Configuration, db::DatabaseConfiguration},
     get_subscriber, init_logger,
 };
 
 pub struct ConfigureTestContext {
     pub port: u16,
     pub connection_pool: PgPool,
-    app_config: AppConfig,
+    app_config: Configuration,
     handle: JoinHandle<Result<(), std::io::Error>>,
 }
 
@@ -34,7 +34,7 @@ impl ConfigureTestContext {
     pub async fn setup() -> Self {
         let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind random port");
         let port = listener.local_addr().unwrap().port();
-        let mut config = AppConfig::new().expect("Could not load config");
+        let mut config =Configuration::new().expect("Could not load config");
         let connection_pool = Self::setup_db(&mut config.database).await;
         let server = zero2prod::startup::run(listener, connection_pool.clone())
             .expect("Could not start server");
@@ -47,7 +47,7 @@ impl ConfigureTestContext {
             handle,
         }
     }
-    pub async fn setup_db(db_config: &mut DatabaseConfig) -> PgPool {
+    pub async fn setup_db(db_config: &mut DatabaseConfiguration) -> PgPool {
         db_config.name = Uuid::new_v4().to_string();
         let connection = PgPool::connect(
             &db_config

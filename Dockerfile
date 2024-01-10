@@ -1,4 +1,4 @@
-FROM rust:1.75.0
+FROM rust:1.75.0 as builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -15,5 +15,13 @@ COPY . .
 # We'll use the release profile to make it faaaast
 ENV SQLX_OFFLINE=true
 RUN cargo build --release
+
+FROM rust:1.75.0 as runtime
+WORKDIR /app
+
+COPY --from=builder /app/target/release/zero2prod zero2prod
+COPY config config
+
+ENV APP_ENVIRONMENT=production
 # When `docker run` is executed, launch the binary!
-ENTRYPOINT [ "./target/release/zero2prod" ]
+ENTRYPOINT [ "./zero2prod" ]

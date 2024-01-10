@@ -2,7 +2,7 @@ use secrecy::{ExposeSecret, Secret};
 use serde::Deserialize;
 
 #[derive(Deserialize)]
-pub struct DatabaseConfig {
+pub struct DatabaseConfiguration {
     pub host: String,
     pub username: String,
     pub password: Secret<String>,
@@ -10,7 +10,7 @@ pub struct DatabaseConfig {
     pub name: String,
 }
 
-impl DatabaseConfig {
+impl DatabaseConfiguration {
     pub fn connection_string(&self) -> Secret<String> {
         Secret::new(format!(
             "postgresql://{}:{}@{}/{}",
