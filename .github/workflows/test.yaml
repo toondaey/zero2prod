@@ -56,6 +56,12 @@ jobs:
         with:
           command: check
 
+      - name: run fmt check
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all --check
+
       # - name: run audit
       #   uses: actions-rs/cargo@v1
       #   with:

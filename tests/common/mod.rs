@@ -3,6 +3,7 @@
 use std::net::TcpListener;
 
 use once_cell::sync::Lazy;
+use secrecy::{ExposeSecret, Secret};
 use sqlx::{Executor, PgPool};
 use tokio::task::JoinHandle;
 use uuid::Uuid;
@@ -47,7 +48,7 @@ impl ConfigureTestContext {
         }
     }
     pub async fn setup_db(db_config: &mut DatabaseConfiguration) -> PgPool {
-        db_config.name = Uuid::new_v4().to_string();
+        db_config.name = Secret::new(Uuid::new_v4().to_string());
         let connection = PgPool::connect_with(db_config.without_db())
             .await
             .expect("Could not connect to database");
@@ -55,7 +56,7 @@ impl ConfigureTestContext {
         connection
             .execute(sqlx::query(&format!(
                 r#"CREATE DATABASE "{}";"#,
-                db_config.name.as_str()
+                db_config.name.expose_secret()
             )))
             .await
             .expect("Could not create database");
@@ -81,12 +82,12 @@ impl ConfigureTestContext {
         connection
             .execute(sqlx::query(&format!(
                 r#"DROP DATABASE "{}";"#,
-                &self.app_config.database.name
+                self.app_config.database.name.expose_secret()
             )))
             .await
             .expect(&format!(
                 "Could not drop database: {}",
-                &self.app_config.database.name
+                self.app_config.database.name.expose_secret()
             ));
     }
 }
