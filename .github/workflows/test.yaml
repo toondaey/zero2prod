@@ -39,6 +39,9 @@ jobs:
       - name: install psql
         run: sudo apt-get install -y postgresql-client
 
+      - name: create docker network
+        run: docker network create learning
+
       - name: start db
         run: ./scripts/init_db
 
