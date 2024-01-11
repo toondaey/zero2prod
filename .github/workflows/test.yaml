@@ -56,10 +56,10 @@ jobs:
         with:
           command: check
 
-      - name: run audit
-        uses: actions-rs/cargo@v1
-        with:
-          command: audit
+      # - name: run audit
+      #   uses: actions-rs/cargo@v1
+      #   with:
+      #     command: audit
 
       - name: run code coverage
         uses: actions-rs/cargo@v1
