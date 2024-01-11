@@ -9,7 +9,6 @@ async fn main() -> ::std::io::Result<()> {
     let listener = TcpListener::bind(format!("{}:{}", config.app.host, config.app.port))
         .expect("Port is already assigned");
 
-
     let connection_pool = PgPool::connect_with(config.database.with_db())
         .await
         .expect("Could not connect to the database");

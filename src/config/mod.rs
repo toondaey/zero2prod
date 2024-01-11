@@ -37,8 +37,8 @@ impl Configuration {
 
 #[derive(Debug)]
 enum AppEnvironment {
-    PRODUCTION,
-    LOCAL,
+    Prouction,
+    Local,
 }
 
 impl TryFrom<String> for AppEnvironment {
@@ -46,8 +46,8 @@ impl TryFrom<String> for AppEnvironment {
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
         match value.to_lowercase().as_str() {
-            "local" => Ok(AppEnvironment::LOCAL),
-            "production" => Ok(AppEnvironment::PRODUCTION),
+            "local" => Ok(AppEnvironment::Local),
+            "production" => Ok(AppEnvironment::Prouction),
             x => Err(ConfigError::Message(format!(
                 "Unable to process environment specified: {x}"
             ))),
@@ -58,8 +58,8 @@ impl TryFrom<String> for AppEnvironment {
 impl AppEnvironment {
     fn get_config(&self) -> File<FileSourceFile, FileFormat> {
         match self {
-            AppEnvironment::PRODUCTION => File::with_name("config/production").required(true),
-            AppEnvironment::LOCAL => File::with_name("config/local").required(true),
+            AppEnvironment::Prouction => File::with_name("config/production").required(true),
+            AppEnvironment::Local => File::with_name("config/local").required(true),
         }
     }
 }
