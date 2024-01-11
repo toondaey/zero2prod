@@ -1,32 +1,28 @@
-FROM rust:1.75.0-slim as builder
+FROM lukemathwalker/cargo-chef:0.1.62-rust-slim-bullseye as c-chef
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Let's switch our working directory to `app` (equivalent to `cd app`)
-# The `app` folder will be created for us by Docker in case it does not 
-# exist already.
-WORKDIR /app
-# Install the required system dependencies for our linking configuration
 RUN apt-get -qq update \
-    && apt-get -qq install lld clang openssl ca-certificates libssl-dev pkg-config
-# Copy all files from our working environment to our Docker image 
+    && apt-get -qq install clang lld libssl-dev pkg-config \
+    && apt-get -qq autoremove \
+    && apt-get -qq clean \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+FROM c-chef as planner
 COPY . .
-# Let's build our binary!
-# We'll use the release profile to make it faaaast
+RUN cargo chef prepare --recipe-path=recipe.json
+
+FROM c-chef as builder
+ENV DEBIAN_FRONTEND=noninteractive
+COPY --from=planner /app/recipe.json recipe.json
+
+RUN cargo chef cook --release --recipe-path=recipe.json
+COPY . .
 ENV SQLX_OFFLINE=true
-RUN cargo build --release
+RUN cargo build --release --bin zero2prod
 
-# FROM alpine:3.19 as runtime
-# RUN apk add --no-cache openssl ca-certificates pkgconfig libc6-compat
-
-# WORKDIR /app
-
-# COPY --from=builder /app/target/release/zero2prod zero2prod
-# COPY config config
-
-# ENV APP_ENVIRONMENT=production
-# # When `docker run` is executed, launch the binary!
-# ENTRYPOINT [ "/app/zero2prod" ]
 FROM debian:stable-slim as runtime
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get -qq update \
@@ -40,7 +36,7 @@ WORKDIR /app
 COPY --from=builder /app/target/release/zero2prod zero2prod
 COPY config config
 
-ENV APP_ENVIRONMENT=production
-# When `docker run` is executed, launch the binary!
+# ENV APP_ENVIRONMENT=production
+# ENV APP__DATABASE__HOST=localhost
+# ENV APP__APP__HOST=127.0.0.1
 ENTRYPOINT [ "/app/zero2prod" ]
-

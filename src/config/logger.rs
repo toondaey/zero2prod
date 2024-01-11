@@ -3,7 +3,7 @@ use tracing::Subscriber;
 use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
 use tracing_subscriber::{prelude::__tracing_subscriber_SubscriberExt, EnvFilter, Registry};
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct LoggerConfiguration {
     pub name: String,
     pub level: String,
