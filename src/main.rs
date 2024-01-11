@@ -20,5 +20,7 @@ async fn main() -> ::std::io::Result<()> {
     let subscriber = get_subscriber(config.logger.name, config.logger.level, std::io::stdout);
     init_logger(subscriber);
 
+    tracing::info!("Started application at - {}:{}", config.app.host, config.app.port);
+
     zero2prod::startup::run(listener, connection_pool)?.await
 }

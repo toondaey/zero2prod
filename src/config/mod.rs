@@ -20,18 +20,18 @@ pub struct Configuration {
 
 impl Configuration {
     pub fn new() -> Result<Self, ConfigError> {
-        let builder = Config::builder()
-            .add_source(File::with_name("config/global"))
-            .add_source(Environment::with_prefix("app").separator("_"));
-
         let app_env: AppEnvironment = std::env::var("APP_ENVIRONMENT")
             .unwrap_or("local".to_string())
             .try_into()?;
 
+        let builder = Config::builder()
+            .add_source(File::with_name("config/global"))
+            .add_source(Environment::with_prefix("app").separator("_"));
+
         let builder = builder.add_source(
             match app_env {
-                AppEnvironment::PRODUCTION => File::with_name("config/local").required(true),
-                AppEnvironment::LOCAL => File::with_name("config/production").required(true),
+                AppEnvironment::PRODUCTION => File::with_name("config/production").required(true),
+                AppEnvironment::LOCAL => File::with_name("config/local").required(true),
             }
         );
 
@@ -39,6 +39,7 @@ impl Configuration {
     }
 }
 
+#[derive(Debug)]
 enum AppEnvironment {
     PRODUCTION,
     LOCAL,
