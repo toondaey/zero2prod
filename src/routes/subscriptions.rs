@@ -2,7 +2,9 @@ use actix_web::{post, web, HttpResponse};
 use sqlx::PgPool;
 
 use crate::{
-    database::subscriptions::insert_subscriber, dtos::subscriptions::SubscriptionsFormData,
+    database::subscriptions::insert_subscriber,
+    domain::{NewSubscriber, SubscriberName},
+    dtos::subscriptions::SubscriptionsFormData,
 };
 
 #[post("/subscriptions")]
@@ -15,7 +17,14 @@ pub async fn subscriptions(
     form: web::Form<SubscriptionsFormData>,
     connection_pool: web::Data<PgPool>,
 ) -> HttpResponse {
-    match insert_subscriber(&form, &connection_pool).await {
+    let new_subscriber = NewSubscriber {
+        email: form.0.email,
+        name: match SubscriberName::parse(form.0.name) {
+            Ok(name) => name,
+            Err(_) => return HttpResponse::BadRequest().finish(),
+        },
+    };
+    match insert_subscriber(&new_subscriber, &connection_pool).await {
         Ok(_) => HttpResponse::Ok().finish(),
         Err(_) => HttpResponse::InternalServerError().finish(),
     }

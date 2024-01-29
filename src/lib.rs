@@ -5,6 +5,7 @@ use tracing_subscriber::{
     fmt::MakeWriter, prelude::__tracing_subscriber_SubscriberExt, EnvFilter, Registry,
 };
 
+mod domain;
 pub mod config;
 pub mod database;
 pub mod dtos;

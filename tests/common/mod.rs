@@ -47,6 +47,7 @@ impl ConfigureTestContext {
             handle,
         }
     }
+
     pub async fn setup_db(db_config: &mut DatabaseConfiguration) -> PgPool {
         db_config.name = Secret::new(Uuid::new_v4().to_string());
         let connection = PgPool::connect_with(db_config.without_db())

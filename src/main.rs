@@ -1,7 +1,11 @@
 use std::net::TcpListener;
 
+use mimalloc::MiMalloc;
 use sqlx::PgPool;
 use zero2prod::{config::Configuration, get_subscriber, init_logger};
+
+#[global_allocator]
+static GLOBAL: MiMalloc = MiMalloc;
 
 #[tokio::main]
 async fn main() -> ::std::io::Result<()> {

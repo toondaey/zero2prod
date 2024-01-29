@@ -2,11 +2,11 @@ use chrono::Utc;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::dtos::subscriptions::SubscriptionsFormData;
+use crate::domain::NewSubscriber;
 
 #[tracing::instrument(name = "Saving new subscriber...", skip(form, connection_pool))]
 pub async fn insert_subscriber(
-    form: &SubscriptionsFormData,
+    form: &NewSubscriber,
     connection_pool: &PgPool,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
@@ -15,7 +15,7 @@ pub async fn insert_subscriber(
         VALUES ($1, $2, $3, $4)
         "#,
         Uuid::new_v4(),
-        form.name,
+        form.name.as_ref(),
         form.email,
         Utc::now()
     )
