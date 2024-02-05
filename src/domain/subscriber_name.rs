@@ -1,10 +1,5 @@
 use unicode_segmentation::UnicodeSegmentation;
 
-pub struct NewSubscriber {
-    pub name: SubscriberName,
-    pub email: String,
-}
-
 #[derive(serde::Deserialize, Debug)]
 pub struct SubscriberName(String);
 
@@ -31,7 +26,7 @@ impl AsRef<str> for SubscriberName {
 
 #[cfg(test)]
 mod test {
-    use claim::{assert_ok, assert_err};
+    use claim::{assert_err, assert_ok};
 
     use super::SubscriberName;
 
