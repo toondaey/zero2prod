@@ -53,4 +53,7 @@ path = "src/main.rs"
 name = "zero2prod"
 
 [dev-dependencies]
+fake = "2.9.2"
+quickcheck = "1.0.3"
+quickcheck_macros = "1.0.0"
 test-case = "3.1.0"

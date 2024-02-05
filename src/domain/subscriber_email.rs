@@ -16,8 +16,26 @@ impl SubscriberEmail {
 #[cfg(test)]
 mod test {
     use claim::assert_err;
+    use fake::{faker::internet::en::SafeEmail, Fake};
+    use quickcheck::Arbitrary;
 
     use super::SubscriberEmail;
+
+    #[derive(Debug, Clone)]
+    struct ValidEmailFixture(pub String);
+
+    impl Arbitrary for ValidEmailFixture {
+        fn arbitrary(_g: &mut quickcheck::Gen) -> Self {
+            let email = SafeEmail().fake();
+            Self(email)
+        }
+    }
+
+    #[quickcheck_macros::quickcheck]
+    fn test_valid_email(valid_email: ValidEmailFixture) -> bool {
+        dbg!(&valid_email.0);
+        SubscriberEmail::parse(valid_email.0).is_ok()
+    }
 
     #[test]
     fn empty_string_is_rejected() {
