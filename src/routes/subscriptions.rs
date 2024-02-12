@@ -3,7 +3,7 @@ use sqlx::PgPool;
 
 use crate::{
     database::subscriptions::insert_subscriber,
-    domain::{NewSubscriber, SubscriberName},
+    domain::{NewSubscriber, SubscriberEmail, SubscriberName},
     dtos::subscriptions::SubscriptionsFormData,
 };
 
@@ -18,7 +18,10 @@ pub async fn subscriptions(
     connection_pool: web::Data<PgPool>,
 ) -> HttpResponse {
     let new_subscriber = NewSubscriber {
-        email: form.0.email,
+        email: match SubscriberEmail::parse(form.0.email) {
+            Ok(email) => email,
+            Err(_) => return HttpResponse::BadRequest().finish()
+        },
         name: match SubscriberName::parse(form.0.name) {
             Ok(name) => name,
             Err(_) => return HttpResponse::BadRequest().finish(),

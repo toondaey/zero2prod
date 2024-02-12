@@ -30,7 +30,7 @@ docker run \
     --rm \
     --name z2p-db \
     --network learning \
-    -d postgres \
+    -d postgres:alpine3.19 \
     postgres -N 1000 \
     -c log_statement=all -c log_destination=stderr
 fi

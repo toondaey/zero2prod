@@ -16,7 +16,7 @@ pub async fn insert_subscriber(
         "#,
         Uuid::new_v4(),
         form.name.as_ref(),
-        form.email,
+        form.email.as_ref(),
         Utc::now()
     )
     .execute(connection_pool)
