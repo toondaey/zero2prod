@@ -18,6 +18,8 @@ POSTGRES_PASSWORD="${POSTGRES_PASSWORD:=password}"
 POSTGRES_DB="${POSTGRES_DB:=newsletter}"
 POSTGRES_PORT="${POSTGRES_PORT:=5432}"
 
+docker network inspect learning || docker network create learning
+
 if [[ -z ${SKIP_DOCKER} ]]; then
 docker run \
     -e POSTGRES_USER="${POSTGRES_USER:=postgres}" \
@@ -27,7 +29,8 @@ docker run \
     --health-cmd pg_isready \
     --rm \
     --name z2p-db \
-    -d postgres \
+    --network learning \
+    -d postgres:alpine3.19 \
     postgres -N 1000 \
     -c log_statement=all -c log_destination=stderr
 fi

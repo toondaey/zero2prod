@@ -3,4 +3,3 @@ pub struct SubscriptionsFormData {
     pub email: String,
     pub name: String,
 }
-

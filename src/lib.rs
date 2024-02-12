@@ -6,10 +6,11 @@ use tracing_subscriber::{
 };
 
 pub mod config;
+pub mod database;
+mod domain;
 pub mod dtos;
 pub mod routes;
 pub mod startup;
-pub mod database;
 
 pub fn get_subscriber<TSink>(
     name: String,

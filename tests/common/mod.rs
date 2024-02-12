@@ -3,19 +3,19 @@
 use std::net::TcpListener;
 
 use once_cell::sync::Lazy;
-use secrecy::ExposeSecret;
+use secrecy::{ExposeSecret, Secret};
 use sqlx::{Executor, PgPool};
 use tokio::task::JoinHandle;
 use uuid::Uuid;
 use zero2prod::{
-    config::{app_config::AppConfig, db_config::DatabaseConfig},
+    config::{db::DatabaseConfiguration, Configuration},
     get_subscriber, init_logger,
 };
 
 pub struct ConfigureTestContext {
     pub port: u16,
     pub connection_pool: PgPool,
-    app_config: AppConfig,
+    app_config: Configuration,
     handle: JoinHandle<Result<(), std::io::Error>>,
 }
 
@@ -34,7 +34,7 @@ impl ConfigureTestContext {
     pub async fn setup() -> Self {
         let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind random port");
         let port = listener.local_addr().unwrap().port();
-        let mut config = AppConfig::new().expect("Could not load config");
+        let mut config = Configuration::new().expect("Could not load config");
         let connection_pool = Self::setup_db(&mut config.database).await;
         let server = zero2prod::startup::run(listener, connection_pool.clone())
             .expect("Could not start server");
@@ -47,21 +47,22 @@ impl ConfigureTestContext {
             handle,
         }
     }
-    pub async fn setup_db(db_config: &mut DatabaseConfig) -> PgPool {
-        db_config.name = Uuid::new_v4().to_string();
-        let connection = PgPool::connect(&db_config.connection_string_without_db_name().expose_secret())
+
+    pub async fn setup_db(db_config: &mut DatabaseConfiguration) -> PgPool {
+        db_config.name = Secret::new(Uuid::new_v4().to_string());
+        let connection = PgPool::connect_with(db_config.without_db())
             .await
             .expect("Could not connect to database");
 
         connection
             .execute(sqlx::query(&format!(
                 r#"CREATE DATABASE "{}";"#,
-                db_config.name.as_str()
+                db_config.name.expose_secret()
             )))
             .await
             .expect("Could not create database");
 
-        let connection_pool = PgPool::connect(&db_config.connection_string().expose_secret())
+        let connection_pool = PgPool::connect_with(db_config.with_db())
             .await
             .expect("Could not connect to database");
 
@@ -75,20 +76,19 @@ impl ConfigureTestContext {
     pub async fn teardown(&self) {
         self.connection_pool.close().await;
         let _ = &self.handle.abort();
-        let connection =
-            PgPool::connect(&self.app_config.database.connection_string_without_db_name().expose_secret())
-                .await
-                .expect("Could not connect to database");
+        let connection = PgPool::connect_with(self.app_config.database.without_db())
+            .await
+            .expect("Could not connect to database");
 
         connection
             .execute(sqlx::query(&format!(
                 r#"DROP DATABASE "{}";"#,
-                &self.app_config.database.name
+                self.app_config.database.name.expose_secret()
             )))
             .await
             .expect(&format!(
                 "Could not drop database: {}",
-                &self.app_config.database.name
+                self.app_config.database.name.expose_secret()
             ));
     }
 }
