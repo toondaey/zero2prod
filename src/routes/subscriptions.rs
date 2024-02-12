@@ -20,7 +20,7 @@ pub async fn subscriptions(
     let new_subscriber = NewSubscriber {
         email: match SubscriberEmail::parse(form.0.email) {
             Ok(email) => email,
-            Err(_) => return HttpResponse::BadRequest().finish()
+            Err(_) => return HttpResponse::BadRequest().finish(),
         },
         name: match SubscriberName::parse(form.0.name) {
             Ok(name) => name,
